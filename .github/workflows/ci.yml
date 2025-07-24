@@ -18,22 +18,22 @@ jobs:
 
       - name: Build Docker containers
         run: |
-          docker-compose -f docker-compose.dev.yml build
+          docker compose -f docker-compose.dev.yml build
 
       - name: Verify containers can start
         run: |
-          docker-compose -f docker-compose.dev.yml up -d
+          docker compose -f docker-compose.dev.yml up -d
           sleep 10
-          docker-compose -f docker-compose.dev.yml ps
-          docker-compose -f docker-compose.dev.yml down
+          docker compose -f docker-compose.dev.yml ps
+          docker compose -f docker-compose.dev.yml down
 
       - name: Build production containers
         run: |
-          docker-compose build
+          docker compose build
 
       - name: Verify production containers can start
         run: |
-          docker-compose up -d
+          docker compose up -d
           sleep 10
-          docker-compose ps
-          docker-compose down
+          docker compose ps
+          docker compose down
