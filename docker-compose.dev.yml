@@ -10,11 +10,6 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - django_network
 
@@ -59,11 +54,6 @@ services:
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/app/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - django_network
 
@@ -81,11 +71,6 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CELERY_TASK_ALWAYS_EAGER=False
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-    depends_on:
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_healthy
     networks:
       - django_network
 
@@ -102,12 +87,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - CELERY_TASK_ALWAYS_EAGER=False
-      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-    depends_on:
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_healthy
     networks:
       - django_network
 
@@ -124,11 +103,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-    depends_on:
-      redis:
-        condition: service_healthy
-      celery_worker:
-        condition: service_started
     networks:
       - django_network
 
@@ -145,11 +119,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
-    depends_on:
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_healthy
     networks:
       - django_network
 
