@@ -10,11 +10,6 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - django_network
 
@@ -30,11 +25,6 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U django_user -d django_health_celery"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - django_network
 
@@ -55,16 +45,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://django_user:django_password@postgres:5432/django_health_celery
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/app/health/"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
     networks:
       - django_network
 
@@ -81,13 +61,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://django_user:django_password@postgres:5432/django_health_celery
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      web:
-        condition: service_healthy
     networks:
       - django_network
 
@@ -104,13 +77,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://django_user:django_password@postgres:5432/django_health_celery
-    depends_on:
-      redis:
-        condition: service_healthy
-      postgres:
-        condition: service_healthy
-      web:
-        condition: service_healthy
     networks:
       - django_network
 
@@ -127,11 +93,6 @@ services:
       - CELERY_BROKER_URL=redis://redis:6379/0
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
       - DATABASE_URL=postgresql://django_user:django_password@postgres:5432/django_health_celery
-    depends_on:
-      redis:
-        condition: service_healthy
-      celery_worker:
-        condition: service_started
     networks:
       - django_network
 
@@ -145,17 +106,8 @@ services:
       - ./nginx.conf:/etc/nginx/nginx.conf:ro
       - static_volume:/app/static
       - media_volume:/app/media
-    depends_on:
-      web:
-        condition: service_healthy
     networks:
       - django_network
-
-volumes:
-  redis_data:
-  postgres_data:
-  static_volume:
-  media_volume:
 
 networks:
   django_network:
