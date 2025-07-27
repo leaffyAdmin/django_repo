@@ -7,7 +7,7 @@ This Django application is configured with Celery for background task processing
 1. **Redis Server** - Required as the message brokers
 2. **Python Dependencies** - Install from requirements.txt
 
-## Installation
+## Installations
 
 ### 1. Install Dependencies
 
