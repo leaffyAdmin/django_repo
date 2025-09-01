@@ -8,7 +8,7 @@ on:
 
 jobs:
   docker-build:
-    runs-on: monkci-runners
+    runs-on: monkci-runner
 
     steps:
       - uses: actions/checkout@v4
