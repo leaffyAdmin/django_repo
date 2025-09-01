@@ -1,6 +1,6 @@
 # Celery and Celery Beat Setup
 
-This Django application is configured with Celery for background task processing and Celery Beat for scheduled tasks
+This Django application is configured with Celery for background task processing and Celery Beat for scheduled tasks.
 
 ## Prerequisites
 
