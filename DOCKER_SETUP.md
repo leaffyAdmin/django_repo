@@ -1,4 +1,4 @@
-# Docker Setup and Deployments
+# Docker Setup and Deployment
 
 This Django application is fully containerized using Docker with Ubuntu base images, Redis, and optional PostgreSQL.
 
