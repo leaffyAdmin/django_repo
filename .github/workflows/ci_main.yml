@@ -1,5 +1,4 @@
 name: Docker Build Pipeline monkci
-
 on:
   push:
     branches: [main, master]
