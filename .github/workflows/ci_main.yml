@@ -1,15 +1,28 @@
-name: Force Cache Hit
+name: Debug Proxy Connection
 on: workflow_dispatch
 
 jobs:
-  test-cache:
+  debug-connection:
     runs-on: self-hosted
     steps:
-      # 1. Create a dummy file to save
-      - run: echo "Hello Proxy" > proxy-test.txt
+      # TEST 1: Can we see the proxy?
+      - name: 🔍 Check Connectivity to Proxy
+        run: |
+          echo "Testing connection to Go Proxy..."
+          curl -v http://127.0.0.1:8080 || echo " Failed to connect"
+      
+      # TEST 2: Create a file to cache
+      - name: 📄 Create Dummy File
+        run: echo "I am a debug file created at $(date)" > debug.txt
 
-      # 2. This step triggers the NETWORK REQUEST to your Proxy
-      - uses: actions/cache@v3
+      # TEST 3: Save to Cache (WITH FORCED ENV)
+      - name: 💾 Save to Proxy Cache
+        uses: actions/cache@v3
         with:
-          path: proxy-test.txt
-          key: my-test-cache-${{ github.run_id }}
+          path: debug.txt
+          key: debug-cache-${{ github.run_id }}
+        env:
+          # We FORCE the URL and the Fake JWT here
+          ACTIONS_CACHE_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
+          ACTIONS_RUNTIME_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
+          ACTIONS_RUNTIME_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
