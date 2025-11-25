@@ -1,21 +1,15 @@
-name: Force Proxy Cache
+name: Proxy Cache Test
 on: workflow_dispatch
 
 jobs:
-  test-proxy-connection:
+  test-save:
     runs-on: self-hosted
     steps:
-      - name: Create Dummy File
-        run: echo "I am a test file" > test.txt
+      - name: Create File
+        run: echo "Proxy Data $(date)" > proxy.txt
 
-      - name: Save to Proxy (Forced Env)
+      - name: Save to Cache
         uses: actions/cache@v3
         with:
-          path: test.txt
-          key: forced-proxy-cache-${{ github.run_id }}
-        env:
-          # We force the runner to look at Localhost (Your Go Proxy)
-          ACTIONS_CACHE_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
-          ACTIONS_RUNTIME_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
-          ACTIONS_RESULTS_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
-          ACTIONS_RUNTIME_TOKEN: "dummy-token"
+          path: proxy.txt
+          key: proxy-test-${{ github.run_id }}
