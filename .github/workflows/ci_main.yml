@@ -1,43 +1,12 @@
-name: Test_GCP Cache Proxy Without Docker
+name: Check Runner Env
 
-on:
-  workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
-  cache-test:
-    runs-on: self-hosted  # your proxycacherunner VM
-
-    env:
-      ACTIONS_CACHE_URL: "http://136.111.150.143:8080"   # your proxy
-      ACTIONS_RUNTIME_URL: "http://dummy"
-      ACTIONS_RUNTIME_TOKEN: "dummy-token"
-
+  print:
+    runs-on: self-hosted
     steps:
-      - name: Show environment
-        run: |
-          echo "Runner OS: $(uname -a)"
-          echo "Cache URL: $ACTIONS_CACHE_URL"
-
-      - name: Prepare directory
-        run: mkdir -p ~/.cachetest
-
-      - name: RESTORE Cache through Proxy
-        uses: actions/cache/restore@v4
-        with:
-          path: ~/.cachetest
-          key: proxy-test-key-1
-
-      - name: Create Test Data
-        run: |
-          echo "Generated at $(date)" > ~/.cachetest/data.txt
-          echo "Hello world" >> ~/.cachetest/data.txt
-          cat ~/.cachetest/data.txt
-
-      - name: SAVE Cache through Proxy
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.cachetest
-          key: proxy-test-key-1
-
-      - name: Verify cache folder
-        run: ls -R ~/.cachetest
+      - run: |
+          echo "ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL"
+          echo "ACTIONS_RUNTIME_URL=$ACTIONS_RUNTIME_URL"
+          echo "ACTIONS_RUNTIME_TOKEN=$ACTIONS_RUNTIME_TOKEN"
