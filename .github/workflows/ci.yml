@@ -1,43 +1,15 @@
-name: Test Cache Through Proxy
-
-on:
-  workflow_dispatch:
+name: Force Cache Hit
+on: workflow_dispatch
 
 jobs:
   test-cache:
-    runs-on: self-hosted  # <-- your runner on proxycacherunner VM
-
-    env:
-      ACTIONS_CACHE_URL: "http://136.111.150.143:8080"
-      # example: ACTIONS_CACHE_URL: "http://136.111.150.143:8080"
-
+    runs-on: self-hosted
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      # 1. Create a dummy file to save
+      - run: echo "Hello Proxy" > proxy-test.txt
 
-      - name: Set custom cache endpoint
-        run: |
-          echo "ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL" >> $GITHUB_ENV
-          echo "ACTIONS_RUNTIME_URL=https://dummy" >> $GITHUB_ENV
-          echo "ACTIONS_RUNTIME_TOKEN=dummy-token" >> $GITHUB_ENV
-
-      - name: Cache Test - Restore
-        uses: actions/cache@v4
+      # 2. This step triggers the NETWORK REQUEST to your Proxy
+      - uses: actions/cache@v3
         with:
-          path: ~/.testcache
-          key: proxy-test-key
-
-      - name: Create cache data
-        run: |
-          mkdir -p ~/.testcache
-          echo "This is a test cache generated at $(date)" > ~/.testcache/data.txt
-
-      - name: Cache Test - Save
-        uses: actions/cache/save@v4
-        with:
-          path: ~/.testcache
-          key: proxy-test-key
-
-      - name: Verify Cache
-        run: |
-          ls -R ~/.testcache
+          path: proxy-test.txt
+          key: my-test-cache-${{ github.run_id }}
