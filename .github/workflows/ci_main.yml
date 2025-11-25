@@ -1,60 +1,80 @@
-name: Cache test (self-hosted)
+name: Cache test (self-hosted) Aish
 
 on:
   workflow_dispatch:
 
 jobs:
   cache-check:
-    # run on any self-hosted runner (adjust label if you used custom labels)
-    runs-on: self-hosted
+    name: Cache test (self-hosted runner)
+    # must run on your self-hosted runner that you configured
+    runs-on: [self-hosted, linux, x64]
 
     steps:
-      - name: Checkout repository
+      - name: Checkout (not required but handy)
         uses: actions/checkout@v4
 
-      - name: Show runner & env info (debug)
+      - name: Print runner info + relevant envs
         run: |
           echo "Runner: $RUNNER_NAME"
-          echo "Labels: $RUNNER_LABELS"
+          echo "Runner labels: $RUNNER_LABELS"
           echo "OS: $RUNNER_OS"
           echo "PWD: $(pwd)"
-          echo "Listing network interfaces:"
+          echo "All relevant ENV:"
+          env | grep -E 'CACHE|ACTIONS|API|GCS|GOOGLE|HTTP|HTTPS' || true
           ip -c a || ifconfig || true
+        shell: bash
 
-      - name: Create a small cacheable directory
-        run: |
-          set -e
-          rm -rf cached_dir
-          mkdir -p cached_dir/sub
-          echo "hello world $(date)" > cached_dir/sub/marker.txt
-          echo "files before cache:"
-          ls -la cached_dir || true
-
-      - name: Push cache (actions/cache@v4)
+      - name: Restore cache (first pass - expected miss)
         uses: actions/cache@v4
+        id: restore1
         with:
           path: cached_dir
           key: cache-test-${{ runner.os }}-v1
-          restore-keys: |
-            cache-test-${{ runner.os }}-
-
-      - name: Verify cache pushed (remove local dir)
-        run: |
-          rm -rf cached_dir || true
-          echo "removed cached_dir locally to prove restore step"
-
-      - name: Restore cache (actions/cache@v4)
-        uses: actions/cache@v4
-        with:
-          path: cached_dir
-          key: cache-test-${{ runner.os }}-v1
+          restore-keys: cache-test-${{ runner.os }}-
+          # set lookup-only: false so it can write when saving later
+          lookup-only: false
 
       - name: Show restored files
         run: |
           echo "restored files:"
           ls -la cached_dir || echo "no files restored"
+        shell: bash
 
-      - name: Extra debug — print HTTP proxy/env that runner saw
+      - name: Create a small cacheable directory
         run: |
-          echo "All relevant ENV:"
-          env | grep -E 'CACHE|API|GCS|GOOGLE|HTTP|HTTPS' || true
+          rm -rf cached_dir
+          mkdir -p cached_dir/sub
+          echo "hello world $(date)" > cached_dir/sub/marker.txt
+          echo "files before cache:"
+          ls -la cached_dir || true
+        shell: bash
+
+      - name: Push cache (this triggers upload in post step)
+        uses: actions/cache@v4
+        id: save1
+        with:
+          path: cached_dir
+          key: cache-test-${{ runner.os }}-v1
+          # keep restore-keys empty to avoid matching existing caches
+          restore-keys: |
+            cache-test-${{ runner.os }}-
+
+      - name: Remove local dir to prove restore
+        run: |
+          rm -rf cached_dir || true
+          echo "removed cached_dir locally to prove restore step"
+        shell: bash
+
+      - name: Restore cache (verify cache was pushed)
+        uses: actions/cache@v4
+        id: restore2
+        with:
+          path: cached_dir
+          key: cache-test-${{ runner.os }}-v1
+          restore-keys: cache-test-${{ runner.os }}-
+
+      - name: Show restored files (final)
+        run: |
+          echo "restored files now:"
+          ls -la cached_dir || echo "no files restored"
+        shell: bash
