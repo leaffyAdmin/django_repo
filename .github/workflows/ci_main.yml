@@ -1,28 +1,12 @@
-name: Debug Proxy Connection
+name: Debug Env
 on: workflow_dispatch
 
 jobs:
-  debug-connection:
+  check-env:
     runs-on: self-hosted
     steps:
-      # TEST 1: Can we see the proxy?
-      - name: 🔍 Check Connectivity to Proxy
+      - name: Dump Environment Variables
         run: |
-          echo "Testing connection to Go Proxy..."
-          curl -v http://127.0.0.1:8080 || echo " Failed to connect"
-      
-      # TEST 2: Create a file to cache
-      - name: 📄 Create Dummy File
-        run: echo "I am a debug file created at $(date)" > debug.txt
-
-      # TEST 3: Save to Cache (WITH FORCED ENV)
-      - name: 💾 Save to Proxy Cache
-        uses: actions/cache@v3
-        with:
-          path: debug.txt
-          key: debug-cache-${{ github.run_id }}
-        env:
-          # We FORCE the URL and the Fake JWT here
-          ACTIONS_CACHE_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
-          ACTIONS_RUNTIME_URL: "http://127.0.0.1:8080/_apis/artifactcache/"
-          ACTIONS_RUNTIME_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+          echo "--- ACTIONS VARIABLES ---"
+          env | grep ACTIONS_
+          echo "-------------------------"
