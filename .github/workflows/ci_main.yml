@@ -1,12 +1,60 @@
-name: Debug Env
-on: workflow_dispatch
+name: Cache test (self-hosted)
+
+on:
+  workflow_dispatch:
 
 jobs:
-  check-env:
+  cache-check:
+    # run on any self-hosted runner (adjust label if you used custom labels)
     runs-on: self-hosted
+
     steps:
-      - name: Dump Environment Variables
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show runner & env info (debug)
         run: |
-          echo "--- ACTIONS VARIABLES ---"
-          env | grep ACTIONS_
-          echo "-------------------------"
+          echo "Runner: $RUNNER_NAME"
+          echo "Labels: $RUNNER_LABELS"
+          echo "OS: $RUNNER_OS"
+          echo "PWD: $(pwd)"
+          echo "Listing network interfaces:"
+          ip -c a || ifconfig || true
+
+      - name: Create a small cacheable directory
+        run: |
+          set -e
+          rm -rf cached_dir
+          mkdir -p cached_dir/sub
+          echo "hello world $(date)" > cached_dir/sub/marker.txt
+          echo "files before cache:"
+          ls -la cached_dir || true
+
+      - name: Push cache (actions/cache@v4)
+        uses: actions/cache@v4
+        with:
+          path: cached_dir
+          key: cache-test-${{ runner.os }}-v1
+          restore-keys: |
+            cache-test-${{ runner.os }}-
+
+      - name: Verify cache pushed (remove local dir)
+        run: |
+          rm -rf cached_dir || true
+          echo "removed cached_dir locally to prove restore step"
+
+      - name: Restore cache (actions/cache@v4)
+        uses: actions/cache@v4
+        with:
+          path: cached_dir
+          key: cache-test-${{ runner.os }}-v1
+
+      - name: Show restored files
+        run: |
+          echo "restored files:"
+          ls -la cached_dir || echo "no files restored"
+
+      - name: Extra debug — print HTTP proxy/env that runner saw
+        run: |
+          echo "All relevant ENV:"
+          env | grep -E 'CACHE|API|GCS|GOOGLE|HTTP|HTTPS' || true
