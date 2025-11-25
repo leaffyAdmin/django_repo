@@ -1,12 +1,15 @@
-name: Check Runner Env
-
+name: Force Cache Hit
 on: workflow_dispatch
 
 jobs:
-  print:
+  test-cache:
     runs-on: self-hosted
     steps:
-      - run: |
-          echo "ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL"
-          echo "ACTIONS_RUNTIME_URL=$ACTIONS_RUNTIME_URL"
-          echo "ACTIONS_RUNTIME_TOKEN=$ACTIONS_RUNTIME_TOKEN"
+      # 1. Create a dummy file to save
+      - run: echo "Hello Proxy" > proxy-test.txt
+
+      # 2. This step triggers the NETWORK REQUEST to your Proxy
+      - uses: actions/cache@v3
+        with:
+          path: proxy-test.txt
+          key: my-test-cache-${{ github.run_id }}
