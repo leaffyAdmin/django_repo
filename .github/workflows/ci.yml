@@ -1,22 +1,43 @@
-name: Docker Build Pipeline github actions
-
+name: Test Cache Through Proxy
 
 on:
-  push:
-    branches: [main, master]
-  pull_request:
-    branches: [main, master]
+  workflow_dispatch:
 
 jobs:
-  docker-build:
-    runs-on: ubuntu-latest
+  test-cache:
+    runs-on: self-hosted  # <-- your runner on proxycacherunner VM
+
+    env:
+      ACTIONS_CACHE_URL: "http://136.111.150.143:8080"
+      # example: ACTIONS_CACHE_URL: "http://136.111.150.143:8080"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Build production containers
+      - name: Set custom cache endpoint
         run: |
-          docker compose -f docker-compose.dev.yml up -d
+          echo "ACTIONS_CACHE_URL=$ACTIONS_CACHE_URL" >> $GITHUB_ENV
+          echo "ACTIONS_RUNTIME_URL=https://dummy" >> $GITHUB_ENV
+          echo "ACTIONS_RUNTIME_TOKEN=dummy-token" >> $GITHUB_ENV
+
+      - name: Cache Test - Restore
+        uses: actions/cache@v4
+        with:
+          path: ~/.testcache
+          key: proxy-test-key
+
+      - name: Create cache data
+        run: |
+          mkdir -p ~/.testcache
+          echo "This is a test cache generated at $(date)" > ~/.testcache/data.txt
+
+      - name: Cache Test - Save
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.testcache
+          key: proxy-test-key
+
+      - name: Verify Cache
+        run: |
+          ls -R ~/.testcache
