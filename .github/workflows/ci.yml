@@ -1,20 +1,36 @@
-name: Cache Trace Test
+name: Cache Network Probe
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-cache:
+  cache-test:
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Show runner info
+        run: |
+          echo "Hostname: $(hostname)"
+          echo "Runner OS: $RUNNER_OS"
+          echo "Working directory: $PWD"
 
-      - name: Cache pip
+      - name: Cache test directory
+        id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache/pip
-          key: pip-cache-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+          path: .cache-test
+          key: cache-test-v1
 
-      - name: Install deps
-        run: pip3 install requests
+      - name: Populate cache on miss
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          echo "Cache miss – creating data in .cache-test"
+          mkdir -p .cache-test
+          dd if=/dev/urandom of=.cache-test/random.bin bs=1M count=5
+          echo "Some random content" > .cache-test/info.txt
+
+      - name: Inspect cache directory
+        run: |
+          echo "Listing .cache-test:"
+          ls -lh .cache-test || echo "No cache dir"
+          du -sh .cache-test || true
