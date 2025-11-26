@@ -1,15 +1,20 @@
-name: Proxy Cache Test
-on: workflow_dispatch
+name: Cache Trace Test
+
+on:
+  workflow_dispatch:
 
 jobs:
-  test-save:
+  test-cache:
     runs-on: self-hosted
     steps:
-      - name: Create File
-        run: echo "Proxy Data $(date)" > proxy.txt
+      - uses: actions/checkout@v4
 
-      - name: Save to Cache
-        uses: actions/cache@v3
+      # Cache dir
+      - name: Cache pip
+        uses: actions/cache@v4
         with:
-          path: proxy.txt
-          key: proxy-test-${{ github.run_id }}
+          path: ~/.cache/pip
+          key: pip-cache-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
+
+      - name: Install deps
+        run: pip install requests
