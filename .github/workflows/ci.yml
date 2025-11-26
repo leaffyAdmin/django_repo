@@ -6,10 +6,10 @@ on:
 jobs:
   test-cache:
     runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v4
 
-      # Cache dir
       - name: Cache pip
         uses: actions/cache@v4
         with:
@@ -17,4 +17,4 @@ jobs:
           key: pip-cache-${{ runner.os }}-${{ hashFiles('**/requirements.txt') }}
 
       - name: Install deps
-        run: pip install requests
+        run: pip3 install requests
