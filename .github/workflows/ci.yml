@@ -11,10 +11,13 @@ jobs:
         uses: actions/cache@v4
         env:
           HTTPS_PROXY: http://127.0.0.1:8080
-          https_proxy: http://127.0.0.1:8080
         with:
           path: ~/.npm
           key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: test-${{ runner.os }}-
+
+      - name: Show proxy env
+        run: env | grep -i proxy
+
 
       - run: echo "CACHE INTERCEPTION CHECK"
