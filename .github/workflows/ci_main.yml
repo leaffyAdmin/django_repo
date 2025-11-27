@@ -1,80 +1,19 @@
-name: Cache test (self-hosted) Aish
-
-on:
-  workflow_dispatch:
+name: Cache Intercept Test v3
+on: workflow_dispatch
 
 jobs:
-  cache-check:
-    name: Cache test (self-hosted runner)
-    # must run on your self-hosted runner that you configured
-    runs-on: [self-hosted, linux, x64]
-
+  cache-test:
+    runs-on: [self-hosted, linux]
     steps:
-      - name: Checkout (not required but handy)
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Print runner info + relevant envs
-        run: |
-          echo "Runner: $RUNNER_NAME"
-          echo "Runner labels: $RUNNER_LABELS"
-          echo "OS: $RUNNER_OS"
-          echo "PWD: $(pwd)"
-          echo "All relevant ENV:"
-          env | grep -E 'CACHE|ACTIONS|API|GCS|GOOGLE|HTTP|HTTPS' || true
-          ip -c a || ifconfig || true
-        shell: bash
+      # Optional: debug what env the step sees
+      - name: Debug proxy env
+        run: env | grep -i proxy || true
 
-      - name: Restore cache (first pass - expected miss)
+      - name: Cache npm
         uses: actions/cache@v4
-        id: restore1
         with:
-          path: cached_dir
-          key: cache-test-${{ runner.os }}-v1
-          restore-keys: cache-test-${{ runner.os }}-
-          # set lookup-only: false so it can write when saving later
-          lookup-only: false
-
-      - name: Show restored files
-        run: |
-          echo "restored files:"
-          ls -la cached_dir || echo "no files restored"
-        shell: bash
-
-      - name: Create a small cacheable directory
-        run: |
-          rm -rf cached_dir
-          mkdir -p cached_dir/sub
-          echo "hello world $(date)" > cached_dir/sub/marker.txt
-          echo "files before cache:"
-          ls -la cached_dir || true
-        shell: bash
-
-      - name: Push cache (this triggers upload in post step)
-        uses: actions/cache@v4
-        id: save1
-        with:
-          path: cached_dir
-          key: cache-test-${{ runner.os }}-v1
-          # keep restore-keys empty to avoid matching existing caches
-          restore-keys: |
-            cache-test-${{ runner.os }}-
-
-      - name: Remove local dir to prove restore
-        run: |
-          rm -rf cached_dir || true
-          echo "removed cached_dir locally to prove restore step"
-        shell: bash
-
-      - name: Restore cache (verify cache was pushed)
-        uses: actions/cache@v4
-        id: restore2
-        with:
-          path: cached_dir
-          key: cache-test-${{ runner.os }}-v1
-          restore-keys: cache-test-${{ runner.os }}-
-
-      - name: Show restored files (final)
-        run: |
-          echo "restored files now:"
-          ls -la cached_dir || echo "no files restored"
-        shell: bash
+          path: ~/.npm
+          key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: test-${{ runner.os }}-
