@@ -16,8 +16,9 @@ jobs:
       - name: Cache npm
         uses: actions/cache@v4
         env:
-          HTTPS_PROXY: http://127.0.0.1:8080
-          NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/mitmproxy-ca-cert.crt
+         HTTPS_PROXY: http://127.0.0.1:8080
+         NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/mitmproxy-root.crt
+
         with:
           path: ~/.npm
           key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
