@@ -1,36 +1,14 @@
-name: Cache Network Probe
-
-on:
-  workflow_dispatch:
+name: Cache Intercept Test
+on: workflow_dispatch
 
 jobs:
   cache-test:
-    runs-on: self-hosted
-
+    runs-on: [self-hosted, linux]
     steps:
-      - name: Show runner info
-        run: |
-          echo "Hostname: $(hostname)"
-          echo "Runner OS: $RUNNER_OS"
-          echo "Working directory: $PWD"
-
-      - name: Cache test directory
-        id: cache
-        uses: actions/cache@v4
+      - uses: actions/checkout@v4
+      - uses: actions/cache@v4
         with:
-          path: .cache-test
-          key: cache-test-v1
-
-      - name: Populate cache on miss
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          echo "Cache miss – creating data in .cache-test"
-          mkdir -p .cache-test
-          dd if=/dev/urandom of=.cache-test/random.bin bs=1M count=5
-          echo "Some random content" > .cache-test/info.txt
-
-      - name: Inspect cache directory
-        run: |
-          echo "Listing .cache-test:"
-          ls -lh .cache-test || echo "No cache dir"
-          du -sh .cache-test || true
+          path: ~/.npm
+          key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: test-${{ runner.os }}-
+      - run: echo "CACHE INTERCEPTION CHECK"
