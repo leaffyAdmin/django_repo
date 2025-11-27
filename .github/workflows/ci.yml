@@ -1,4 +1,4 @@
-name: Cache Intercept Test
+name: Cache Intercept Test v1
 on: workflow_dispatch
 
 jobs:
@@ -7,17 +7,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Optional: debug what env the step sees
+      - name: Debug proxy env
+        run: env | grep -i proxy || true
+        env:
+          HTTPS_PROXY: http://127.0.0.1:8080
+
       - name: Cache npm
         uses: actions/cache@v4
         env:
           HTTPS_PROXY: http://127.0.0.1:8080
+          NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/mitmproxy-ca-cert.crt
         with:
           path: ~/.npm
           key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: test-${{ runner.os }}-
 
-      - name: Show proxy env
-        run: env | grep -i proxy
-
-
-      - run: echo "CACHE INTERCEPTION CHECK"
