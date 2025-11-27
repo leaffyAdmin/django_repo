@@ -6,9 +6,15 @@ jobs:
     runs-on: [self-hosted, linux]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/cache@v4
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        env:
+          HTTPS_PROXY: http://127.0.0.1:8080
+          https_proxy: http://127.0.0.1:8080
         with:
           path: ~/.npm
           key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
           restore-keys: test-${{ runner.os }}-
+
       - run: echo "CACHE INTERCEPTION CHECK"
