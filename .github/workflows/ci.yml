@@ -1,4 +1,4 @@
-name: Blacksmith Cache MITM Po
+name: Blacksmith Cache MITM
 
 on:
   workflow_dispatch:   # manual trigger from GitHub UI
