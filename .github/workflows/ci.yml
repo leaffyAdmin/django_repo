@@ -1,20 +1,27 @@
-name: Cache Intercept Test v3
-on: workflow_dispatch
+name: Blacksmith Cache MITM PoC
+
+on:
+  workflow_dispatch:   # manual trigger from GitHub UI
 
 jobs:
   cache-test:
-    runs-on: [self-hosted, linux]
+    runs-on: self-hosted   # uses the runner on your VM
     steps:
-      - uses: actions/checkout@v4
+      - name: Show runner info
+        run: |
+          echo "Runner: $HOSTNAME"
+          uname -a
 
-      # Optional: debug what env the step sees
-      - name: Debug proxy env
-        run: env | grep -i proxy || true
-
-      - name: Cache npm
+      - name: Use GitHub cache (MITM'd)
         uses: actions/cache@v4
         with:
-          path: ~/.npm
-          key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: test-${{ runner.os }}-
+          path: ~/.poc-cache
+          key: test-Linux-
+          restore-keys: |
+            test-Linux-
 
+      - name: Write something into cache path
+        run: |
+          mkdir -p ~/.poc-cache
+          echo "Hello from Blacksmith PoC at $(date)" > ~/.poc-cache/hello.txt
+          ls -R ~/.poc-cache
