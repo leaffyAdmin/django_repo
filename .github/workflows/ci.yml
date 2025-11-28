@@ -1,18 +1,20 @@
-name: Blacksmith Cache MITM
+name: Blacksmith Cache MITM pop
 
 on:
   workflow_dispatch:   # manual trigger from GitHub UI
 
 jobs:
   cache-test:
-    runs-on: self-hosted   # uses the runner on your VM
+    runs-on: self-hosted
+    env:
+      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/blacksmith-ca.crt
     steps:
       - name: Show runner info
         run: |
           echo "Runner: $HOSTNAME"
           uname -a
 
-      - name: Use GitHub cache (MITM'd)
+      - name: Use GitHub cache (MITM)
         uses: actions/cache@v4
         with:
           path: ~/.poc-cache
