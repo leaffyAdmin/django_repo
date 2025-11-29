@@ -5,7 +5,7 @@ on:
 
 jobs:
   cache-test:
-    runs-on: self-hosted
+    runs-on: monkci-miglet-tst1
     env:
       NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/blacksmith-ca.crt
     steps:
