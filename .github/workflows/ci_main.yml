@@ -3,7 +3,7 @@ on: workflow_dispatch
 
 jobs:
   cache-test:
-    runs-on: [self-hosted, linux]
+    runs-on: [monkci-miglet-tst1, linux]
     steps:
       - uses: actions/checkout@v4
 
