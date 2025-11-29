@@ -1,19 +1,21 @@
-name: Cache Intercept Test v4
-on: workflow_dispatch
+name: Docker Build Pipeline monkci
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
 
 jobs:
-  cache-test:
-    runs-on: [monkci-miglet-tst1, linux]
+  docker-build:
+    runs-on: self-hosted
+
     steps:
       - uses: actions/checkout@v4
 
-      # Optional: debug what env the step sees
-      - name: Debug proxy env
-        run: env | grep -i proxy || true
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-      - name: Cache npm
-        uses: actions/cache@v4
-        with:
-          path: ~/.npm
-          key: test-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: test-${{ runner.os }}-
+      - name: Build production containers
+        run: |
+          docker compose -f docker-compose.dev.yml up --build -d
