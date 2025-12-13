@@ -1,29 +1,23 @@
-name: Blacksmith Cache MITM pop
+name: cache-gateway-test
 
 on:
-  workflow_dispatch:   # manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   cache-test:
-    runs-on: monkci-miglet-tst1
-    env:
-      NODE_EXTRA_CA_CERTS: /usr/local/share/ca-certificates/blacksmith-ca.crt
-    steps:
-      - name: Show runner info
-        run: |
-          echo "Runner: $HOSTNAME"
-          uname -a
+    runs-on: self-hosted
 
-      - name: Use GitHub cache (MITM)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Restore cache (test interception)
         uses: actions/cache@v4
         with:
-          path: ~/.poc-cache
-          key: test-Linux-
-          restore-keys: |
-            test-Linux-
+          path: ~/.cache-gateway-test
+          key: test-linux-v1
 
-      - name: Write something into cache path
+      - name: Verify cache directory
         run: |
-          mkdir -p ~/.poc-cache
-          echo "Hello from Blacksmith PoC at $(date)" > ~/.poc-cache/hello.txt
-          ls -R ~/.poc-cache
+          echo "Listing cache directory"
+          ls -la ~/.cache-gateway-test || echo "Cache miss (expected)"
