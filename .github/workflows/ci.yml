@@ -1,15 +1,18 @@
 name: cache-gateway-test
-on: workflow_dispatch
+
+on: 
+  workflow_dispatch:
+
 jobs:
   cache-test:
-    runs-on: self-hosted
+    runs-on: monkci-4vcpu
     steps:
       - name: Create test file
         run: |
           mkdir -p ~/.cache-gateway-test
           echo "Hello from cache $(date)" > ~/.cache-gateway-test/test.txt
           cat ~/.cache-gateway-test/test.txt
-      
+          
       - name: Save cache
         uses: actions/cache@v4
         with:
