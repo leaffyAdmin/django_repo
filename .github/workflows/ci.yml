@@ -1,20 +1,19 @@
-name: cache-gateway-test 1
-
-on: 
-  workflow_dispatch:
-
+name: cache-test
+on: workflow_dispatch
 jobs:
-  cache-test:
-    runs-on: Linux
+  test:
+    runs-on: self-hosted
     steps:
-      - name: Create test file
+      - name: Create test data
         run: |
-          mkdir -p ~/.cache-gateway-test
-          echo "Hello from cache $(date)" > ~/.cache-gateway-test/test.txt
-          cat ~/.cache-gateway-test/test.txt
+          mkdir -p ~/.test-cache
+          echo "Hello $(date)" > ~/.test-cache/data.txt
+          cat ~/.test-cache/data.txt
           
       - name: Save cache
         uses: actions/cache@v4
         with:
-          path: ~/.cache-gateway-test
-          key: test-linux-v1
+          path: ~/.test-cache
+          key: test-${{ github.run_id }}
+          restore-keys: |
+            test-
